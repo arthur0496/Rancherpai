@@ -6,6 +6,8 @@ COPY . /home
 
 WORKDIR /home
 
-RUN pip install slackclient
+COPY .env .env
+
+RUN pip install -r requirements.txt
 
 CMD ["bash", "-c",  "python", "rancherbot.py"]
