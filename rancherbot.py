@@ -13,6 +13,7 @@ RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 UPGRADE_COMMAND = "upgrade"
 ROLLBACK_COMMAND = "rollback"
 FINISH_UPGRADE_COMMAND = "finish upgrade"
+RESTART_SERVICE_COMMAND = "restart"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
 def parse_bot_commands(slack_events):
@@ -34,14 +35,31 @@ def handle_command(command,channel):
   default_response = "deu ruim!!!"
   
   response = None
-  if command.startswith(UPGRADE_COMMAND):
-    response = service_upgrade()
+  words = command.split(" ")
 
-  if command.startswith(ROLLBACK_COMMAND):
-    response = upgrade_rollback()
+  if command.startswith(UPGRADE_COMMAND):
+    if(len(words) != 3):
+      response = 'You passed the wrong amount of arguments for this command'
+    else:
+      response = service_upgrade(words[2],words[1])
+
+  elif command.startswith(ROLLBACK_COMMAND):
+    if(len(words) != 3):
+      response = 'You passed the wrong amount of arguments for this command'
+    else:
+      response = upgrade_rollback(words[2],words[1])
   
-  if command.startswith(FINISH_UPGRADE_COMMAND):
-    response = finish_upgrade()
+  elif command.startswith(FINISH_UPGRADE_COMMAND):
+    if(len(words) != 4):
+      response = 'You passed the wrong amount of arguments for this command'
+    else:
+      response = finish_upgrade(words[3],words[2])
+
+  elif command.startswith(RESTART_SERVICE_COMMAND):
+    if(len(words) != 3):
+      response = 'You passed the wrong amount of arguments for this command'
+    else:
+      response = restart_service(words[2],words[1])
 
   slack_client.api_call(
     "chat.postMessage",
