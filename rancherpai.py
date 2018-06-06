@@ -1,55 +1,40 @@
 import os
+import requests
+import json
 import time
-import re
-from slackclient import SlackClient
 
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
-
-starterbot_id = None
-
-# constants
-RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
-EXAMPLE_COMMAND = "do"
-MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
-
-def parse_bot_commands(slack_events):
-  for event in slack_events:
-    if event["type"] == "message" and not "subtype" in event:
-      user_id, message = parse_direct_mention(event["text"])
-      if user_id == starterbot_id:
-        return message, event["channel"]
-  return None, None
-
-def parse_direct_mention(message_text):
-   matches = re.search(MENTION_REGEX, message_text)
-   if matches : 
-    return (matches.group(1), matches.group(2).strip()) 
-   else:
-     return (None, None)
-
-def handle_command(command,channel):
-  default_response = "deu ruim!!!"
-  
-  response = None
-  if command.startswith(EXAMPLE_COMMAND):
-    response = "deu bom!!!"
-
-  slack_client.api_call(
-    "chat.postMessage",
-    channel=channel,
-    text=response or default_response
-  )
+#environmentName = 'Default'
+environmentName = 'Observ'
+serviceName = 'frontend'
+newImage = 'docker:tropicalhazards/tropical-hazards-front:latest'
 
 
-if __name__ == "__main__":
-  if slack_client.rtm_connect(with_team_state=False):
-    print("Starter Bot connected and running!")
-    # Read bot's user ID by calling Web API method `auth.test`
-    starterbot_id = slack_client.api_call("auth.test")["user_id"]
-    while True:
-      command, channel = parse_bot_commands(slack_client.rtm_read())
-      if command:
-        handle_command(command, channel)
-      time.sleep(RTM_READ_DELAY)
-  else:
-    print("Connection failed. Exception traceback printed above.")
+def service_upgrade():
+    r = requests.get(os.environ['RANCHER_URL'] + 'v1/environments?name=' + environmentName,auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
+
+    environment = r.json()['data'][0]
+
+    r = requests.get(os.environ['RANCHER_URL'] + 'v1/services?name=' + serviceName + '&environmentId=' + environment['id'],auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
+
+    service = r.json()['data'][0]
+    
+    if(service['state'] == 'upgraded'):
+      return 'the service ' + service['name'] + ' is already being updatede finish the update to continue'
+
+    launchConfig = service['launchConfig']
+
+    payload = {
+          'inServiceStrategy': {
+              'batchSize': 1,
+              'intervalMillis': 2000,
+              'startFirst': False,
+              'launchConfig': launchConfig
+          }
+    }
+
+    headers = {'content-type': 'application/json'}
+
+    r = requests.post(os.environ['RANCHER_URL'] + 'v1/services/' + service['id'] + '/?action=upgrade',
+                      data=json.dumps(payload), headers=headers,
+                      auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
+    return 'the service ' + service['name'] + ' is being updated'
