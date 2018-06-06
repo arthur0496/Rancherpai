@@ -2,7 +2,7 @@ import os
 import time
 import re
 from slackclient import SlackClient
-from rancherpai import service_upgrade
+from rancherpai import *
 
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 
@@ -10,7 +10,9 @@ starterbot_id = None
 
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
-EXAMPLE_COMMAND = "upgrade"
+UPGRADE_COMMAND = "upgrade"
+ROLLBACK_COMMAND = "rollback"
+FINISH_UPGRADE_COMMAND = "finish upgrade"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
 def parse_bot_commands(slack_events):
@@ -32,9 +34,14 @@ def handle_command(command,channel):
   default_response = "deu ruim!!!"
   
   response = None
-  if command.startswith(EXAMPLE_COMMAND):
+  if command.startswith(UPGRADE_COMMAND):
     response = service_upgrade()
-    #response = "Upgrading service"
+
+  if command.startswith(ROLLBACK_COMMAND):
+    response = upgrade_rollback()
+  
+  if command.startswith(FINISH_UPGRADE_COMMAND):
+    response = finish_upgrade()
 
   slack_client.api_call(
     "chat.postMessage",
