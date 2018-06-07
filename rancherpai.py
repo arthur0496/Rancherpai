@@ -14,6 +14,48 @@ def get_environment(environmentName):
   else:
     return None
 
+def get_services(environment):
+  r = requests.get(os.environ['RANCHER_URL'] + 'v1/services?environmentId=' + environment['id'],auth=(os.environ['RANCHER_ACCESS_KEY'],os.environ['RANCHER_SECRET_KEY']))
+  
+  if (len(r.json()['data']) > 0):
+    return r.json()['data']
+  else:
+    return None
+
+def get_environment_status(environmentName):
+  environment = get_environment(environmentName)
+
+  if (not environment):
+    return 'Environment not found'
+  else:
+    response = 'Name : ' + environment['name'] + '\nDescription: '
+  if (environment['description']):
+    response += environment['description']
+  else:
+    response += 'null'
+  response += '\nState: ' + environment['state']
+  response += '\nHealth: ' + environment['healthState']
+  response += '\nServices: '
+  
+  services = get_services(environment)
+
+  if (not services):
+    response += 'None'
+  else:
+    for service in services:
+      response += '\n\tService: ' + service['name']
+      response += '\n\t\tDescription: '
+      if(service['description']):
+        response += service['description']
+      else:
+        response += 'null'
+      response += '\n\t\tState: ' + service['state']
+      response += '\n\t\tHealth: ' + service['healthState']
+  return response
+
+
+
+
 def get_service(serviceName,environmentName):
   environment = get_environment(environmentName)
   
@@ -37,7 +79,7 @@ def get_service_status(serviceName,environmentName):
       description = service['description']
     else:
       description = 'null'
-    return 'Service: ' + serviceName + '\nStack: ' + environmentName + '\nDescription: ' + description + '\nState: ' + service['state'] + '\nHealth: ' + service['healthState'] 
+    return 'Name: ' + serviceName +'\nDescription: ' + description + '\nStack: ' + environmentName +  '\nState: ' + service['state'] + '\nHealth: ' + service['healthState'] 
 
 def get_service_state(serviceName,environmentName):
   service = get_service(serviceName,environmentName)

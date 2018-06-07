@@ -13,7 +13,9 @@ UPGRADE = 'upgrade'
 ROLLBACK_UPGRADE = UPGRADE + ' rollback'
 FINISH_UPGRADE = UPGRADE + ' finish'
 
-
+#environment commands
+ENVIRONMENT = 'stack'
+STATUS_ENVIRONMENT = ENVIRONMENT + ' status'
 
 
 def handle_command(command):
@@ -24,6 +26,8 @@ def handle_command(command):
     response = handle_service_command(command)
   elif (command.startswith(UPGRADE)):
     response = handle_upgrade_command(command)
+  elif (command.startswith(ENVIRONMENT)):
+    response = handle_environment_command(command)
   else:
     response = None
 
@@ -75,4 +79,13 @@ def handle_upgrade_command(command):
       return finish_upgrade(words[3],words[2])
   else:
     return None
+def handle_environment_command(command):
+  words = command.split(' ')
 
+  if (command.startswith(STATUS_ENVIRONMENT)):
+    if (len(words) != 3): 
+      return 'The command \"' + STATUS_ENVIRONMENT + '\" requires exactly 1 argument'
+    else:
+      return get_environment_status(words[2])
+  else:
+    return None
