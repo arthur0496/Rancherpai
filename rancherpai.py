@@ -9,18 +9,60 @@ import time
 def get_environment(environmentName):
   r = requests.get(os.environ['RANCHER_URL'] + 'v1/environments?name=' + environmentName,auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
 
-  return r.json()['data'][0]
+  if (len(r.json()['data']) > 0):
+    return r.json()['data'][0]
+  else:
+    return None
 
 def get_service(serviceName,environmentName):
   environment = get_environment(environmentName)
+  
+  if (environment == None):
+    return None
+  else:
+    r = requests.get(os.environ['RANCHER_URL'] + 'v1/services?name=' + serviceName + '&environmentId=' + environment['id'],auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
+    
+    if(len(r.json()['data']) == 0 ):
+      return None
+    else:
+      return r.json()['data'][0]
 
-  r = requests.get(os.environ['RANCHER_URL'] + 'v1/services?name=' + serviceName + '&environmentId=' + environment['id'],auth=(os.environ['RANCHER_ACCESS_KEY'], os.environ['RANCHER_SECRET_KEY']))
+def get_service_status(serviceName,environmentName):
+  service = get_service(serviceName,environmentName)
 
-  return r.json()['data'][0]
+  if(not service):
+    return 'Service or environment not found'
+  else:
+    if(service['description']):
+      description = service['description']
+    else:
+      description = 'null'
+    return 'Service: ' + serviceName + '\nStack: ' + environmentName + '\nDescription: ' + description + '\nState: ' + service['state'] + '\nHealth: ' + service['healthState'] 
+
+def get_service_state(serviceName,environmentName):
+  service = get_service(serviceName,environmentName)
+
+  if(not service):
+    return 'Service or environment not found'
+  else:
+    return 'The state of the ' + serviceName + ' service in the ' + environmentName + ' stack is: ' + service['state']
+
+
+def get_service_health(serviceName,environmentName):
+  service = get_service(serviceName,environmentName)
+
+  if(not service):
+    return 'Service or environment not found'
+  else:
+    return 'The healthstate of the ' + serviceName + ' service in the ' + environmentName + ' stack is: ' + service['healthState']
+
 
 def service_upgrade(serviceName,environmentName):
 
   service = get_service(serviceName,environmentName)
+
+  if (not service):
+    return 'Service or environment not found'
     
   if(service['state'] == 'upgraded'):
     return 'the service ' + service['name'] + ' is already being upgraded finish the upgrade to continue'
@@ -47,6 +89,9 @@ def upgrade_rollback(serviceName,environmentName):
 
   service = get_service(serviceName,environmentName)
 
+  if (not service):
+    return 'Service or environment not found'
+
   headers = {'content-type': 'application/json'}
 
   if(service['state'] == 'upgraded'):
@@ -60,6 +105,9 @@ def finish_upgrade(serviceName,environmentName):
   
   service = get_service(serviceName,environmentName)
 
+  if (not service):
+    return 'Service or environment not found'
+
   headers = {'content-type': 'application/json'}
   
   if(service['state'] == 'upgraded'):
@@ -71,6 +119,9 @@ def finish_upgrade(serviceName,environmentName):
 
 def restart_service(serviceName,environmentName):
   service = get_service(serviceName,environmentName)
+
+  if (not service):
+    return 'Service or environment not found'
 
   payload = {
     "rollingRestartStrategy": ""
