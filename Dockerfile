@@ -6,8 +6,6 @@ COPY . /home
 
 WORKDIR /home
 
-COPY .env .env
-
 RUN pip install -r requirements.txt
 
 CMD ["bash", "-c",  "python", "rancherbot.py"]
