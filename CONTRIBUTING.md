@@ -12,11 +12,11 @@
 
 * Garanta que o **PR** descreva claramento o problema e solução, que contenha toda a informação necessária para o template e que esteja relacionado a pelo menos uma Issue.
 
-* Tenha certeza de que segue a [política de commit](https://github.com/arthur0496/Rancherpai/blob/master/docs/policies/politica_de_commit.md)
+* Tenha certeza de que segue a [política de commit](https://github.com/arthur0496/Rancherpai/blob/master/politica_de_commit.md)
 
 ### **Você planeja adicionar uma nova funcionalidade ou mudar uma existente?**
 
-* Primeiro, cheque na [lista de Issues](https://github.com/fga-gpp-mds/2018.1-TropicalHazards-BI/issues) e tenha certeza de que ninguém está implementando a funcionalidade que você planeja criar. Caso não exista, você pode prosseguir.
+* Primeiro, cheque na [lista de Issues](https://github.com/arthur0496/Rancherpai/issues) e tenha certeza de que ninguém está implementando a funcionalidade que você planeja criar. Caso não exista, você pode prosseguir.
 
 * [Abra uma nova Issue](https://github.com/arthur0496/Rancherpai/issues/new) com as informações necessárias ao template, seguindo o padrão User Story, Feature ou Epic.
 
@@ -42,7 +42,7 @@ Quando estiver trabalhando em uma funcionalidade, crie uma nova branch seguindo 
 ```bash
 git checkout -b issue_59_funcionalidade_x rancherpai/master
 ```
-Faça as alterações necessárias e realize os commits, seguindo a [política de commits](https://github.com/arthur0496/Rancherpai/blob/master/docs/policies/politica_de_commit.md).
+Faça as alterações necessárias e realize os commits, seguindo a [política de commits](https://github.com/arthur0496/Rancherpai/blob/master/politica_de_commit.md).
 
 Após finalizar os commits envie as alterações para o seu repositório remoto:
 ```bash
